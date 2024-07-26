@@ -95,4 +95,26 @@ async def find_treasure(user: User):
 
 @app.get("/api/leaderboard")
 async def get_leaderboard():
-  leaderboard = sorted()
+  leaderboard = sorted(
+    [{"name": user["name"], "score": user["score"]} for user in users.values()],
+    key=lambda x: x["score"],
+    reverse=True
+  )
+  return leaderboard[:10]
+
+def calculate_distance(loc1, loc2):
+  R = 6371
+  lat1, lon1 = math.radians(loc1["lat"]), math.radians(loc1["lng"])
+  lat2, lon2 = math.radians(loc2["lat"]), math.radians(loc2["lng"])
+  
+  dlat = lat2 - lat1
+  dlon = lon2 - lon1
+  
+  a = math.sin(dlat/2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon/2)**2
+  c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+
+  return R * c
+
+if __name__ == "__main__":
+  import uvicorn
+  uvicorn.run(app, host="0.0.0.0", port=8000)
